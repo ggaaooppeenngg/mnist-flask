@@ -11,7 +11,8 @@ import os
 
 
 app = Flask(__name__)
-host = ""
+host = os.environ.get("INFERENCE_HOST", "http://localhost:9090")
+
 @app.route('/')
 def index():
     return render_template("index.html")
@@ -48,5 +49,4 @@ def parseImage(imgData):
 if __name__ == '__main__':
     app.debug = True
     host = os.environ.get("INFERENCE_HOST", "http://localhost:9090")
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=PORT)

@@ -1,4 +1,7 @@
-# MNIST Flask App
-![](https://github.com/sleepokay/mnist-flask-app/blob/master/media/screenshot.png)
+# 使用 K-Lab 模型服务搭建手写识别 Flask APP
 
-A [Flask](http://flask.pocoo.org/) web app for handwritten digit recognition using a convolutional neural network. The model was trained on the MNIST dataset in [TensorFlow](https://www.tensorflow.org/) using the [Keras API](https://github.com/fchollet/keras).
+使用 Flask APP 搭建基于 K-Lab ONNX 模型服务的手写识别 APP
+
+## 运行方式
+
+`INFERENCE_HOST="模型预测地址" python app.py`
