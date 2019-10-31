@@ -1,19 +1,17 @@
 from flask import Flask, render_template, request
-from scipy.misc import imsave,imread, imresize
+from imageio import imread
+import requests
+from PIL import Image
+from scipy.misc import imsave,imresize
 import numpy as np
-import keras.models
 import re
 import base64
-
 import sys 
 import os
-sys.path.append(os.path.abspath("./model"))
-from load import *
+
 
 app = Flask(__name__)
-global model, graph
-model, graph = init()
-    
+host = ""
 @app.route('/')
 def index():
     return render_template("index.html")
@@ -24,18 +22,22 @@ def predict():
     parseImage(request.get_data())
 
     # read parsed image back in 8-bit, black and white mode (L)
-    x = imread('output.png', mode='L')
+    col = Image.open("output.png")
+    col = col.resize((28,28))
+    gray = col.convert('1')
+    x = np.asarray(gray)
     x = np.invert(x)
-    x = imresize(x,(28,28))
+    
+    x = x.astype(np.float32)
 
     # reshape image data for use in neural network
-    x = x.reshape(1,28,28,1)
-    with graph.as_default():
-        out = model.predict(x)
-        print(out)
-        print(np.argmax(out, axis=1))
-        response = np.array_str(np.argmax(out, axis=1))
-        return response 
+    x = x.reshape(-1,28*28)
+
+    payload = {"inputs":{"input:1":x.tolist()},"outputNames":["output"]}
+    res = requests.post(host, json=payload)
+    a = res.json()["output"][0][0]
+    ret = a.index(max(a))
+    return "{0}".format(ret)
     
 def parseImage(imgData):
     # parse canvas bytes and save as output.png
@@ -45,5 +47,6 @@ def parseImage(imgData):
 
 if __name__ == '__main__':
     app.debug = True
+    host = os.environ.get("INFERENCE_HOST", "http://localhost:9090")
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
